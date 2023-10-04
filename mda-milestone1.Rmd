@@ -169,18 +169,17 @@ glimpse(vancouver_trees)
 
 1.3 **(1 point)** Now that you've explored the 4 datasets that you were initially most interested in, let's narrow it down to 1. What lead you to choose this one? Briefly explain your choice below.
 
+<!-------------------------- Start your work below ---------------------------->
 **Task 1.3 Answer:** I would like to choose cancer_dataset. This dataset provides a wide range of measurements describing the features of benign and malignant cancer cell nuclei,
 I'm curious to find out how those cell features may correlate and is more deterministic towards diagnosis of cancer cells.  Ref: [Breast Cancer Wisconsin (Diagnostic) Dataset](https://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic)
-
-<!-------------------------- Start your work below ---------------------------->
 
 <!----------------------------------------------------------------------------->
 
 1.4 **(2 points)** Time for a  final decision! Going back to the beginning, it's important to have an *end goal* in mind. For example, if I had chosen the `titanic` dataset for my project, I might've wanted to explore the relationship between survival and other variables. Try to think of 1 research question that you would want to answer with your dataset. Note it down below.
-
-**Task 1.4 Answer:** My first research question is whether the radius of the cell nuclei correlate to the diagnosis of the cell healthiness and if so, how do they correlate? 
+ 
 <!-------------------------- Start your work below ---------------------------->
 
+**Task 1.4 Answer:** My first research question is whether the radius of the cell nuclei correlate to the diagnosis of the cell healthiness and if so, how do they correlate?
 <!----------------------------------------------------------------------------->
 
 # Important note
