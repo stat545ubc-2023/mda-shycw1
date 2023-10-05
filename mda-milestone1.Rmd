@@ -4,7 +4,12 @@ author: Chunyu Wang
 date: October 04, 2023
 output: github_document
 ---
-
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  fig.path = "figures/",
+  echo = TRUE
+)
+```
 # Welcome to your (maybe) first-ever data analysis project!
 
 And hopefully the first of many. Let's get started:
@@ -85,7 +90,7 @@ And that is exactly the first thing that you will do!
 **Note**: We encourage you to use the ones in the `datateachr` package, but if you have a dataset that you'd really like to use, you can include it here. But, please check with a member of the teaching team to see whether the dataset is of appropriate complexity. Also, include a **brief** description of the dataset here to help the teaching team understand your data.
 
 <!-------------------------- Start your work below ---------------------------->
-
+**Task 1.1 Answer:**
 1: cancer_sample
 2: steam_games
 3: apt_buildings
@@ -98,9 +103,9 @@ And that is exactly the first thing that you will do!
 *Hint:* This is one of those times when you should think about the cleanliness of your analysis. I added a single code chunk for you below, but do you want to use more than one? Would you like to write more comments outside of the code chunk?
 
 <!-------------------------- Start your work below ---------------------------->
-
-## Dataset 1: Examine cancer_sample dataset
-### print out three attributes:
+**Task 1.2 Answer**
+**Dataset 1: Examine cancer_sample dataset**
+print out three attributes:
 
 ```{r}
 ### EXPLORE HERE ###
@@ -117,12 +122,12 @@ print(attributes_summary(cancer_sample))
 
 
 ```
-### How does cancer_sample look like?
+How does cancer_sample look like?
 ```{r}
 glimpse(cancer_sample)
 ```
-## Dataset 2: Examine steam_games dataset
-### print out three attributes:
+**Dataset 2: Examine steam_games dataset**
+print out three attributes:
 
 ```{r}
 ### EXPLORE HERE ###
@@ -132,12 +137,12 @@ print(attributes_summary(steam_games))
 ```
 
 
-### How does steam_games look like?
+How does steam_games look like?
 ```{r}
 glimpse(steam_games)
 ```
-## Dataset 3: Examine apt_buildings dataset
-### print out three attributes:
+**Dataset 3: Examine apt_buildings dataset**
+print out three attributes:
 
 ```{r}
 ### EXPLORE HERE ###
@@ -145,13 +150,13 @@ glimpse(steam_games)
 print(attributes_summary(apt_buildings))
 
 ```
-### How does apt_buildings look like?
+How does apt_buildings look like?
 ```{r}
 glimpse(apt_buildings)
 ```
 
-## Dataset 4: Examine vancouver_trees dataset
-### print out three attributes:
+**Dataset 4: Examine vancouver_trees dataset**
+print out three attributes:
 
 ```{r}
 ### EXPLORE HERE ###
@@ -159,7 +164,7 @@ glimpse(apt_buildings)
 print(attributes_summary(vancouver_trees))
 
 ```
-### How does vancouver_trees look like?
+How does vancouver_trees look like?
 ```{r}
 glimpse(vancouver_trees)
 ```
@@ -208,6 +213,73 @@ Make sure that you're using dplyr and ggplot2 rather than base R for this task. 
 2.2 **(4 points)** For each of the 4 exercises that you complete, provide a *brief explanation* of why you chose that exercise in relation to your data (in other words, why does it make sense to do that?), and sufficient comments for a reader to understand your reasoning and code.
 
 <!-------------------------- Start your work below ---------------------------->
+**Task 2.1, 2.2 Answer:** I picked exerciese **1**, **2**, **6**, **8** to attempt.
+
+**Exercises 1**: Plot the distribution of radius_mean
+
+**Explanation**: I have a sense of feeling that mean radius of the cell nuclei is related to whether the cell is a benign cell or malignant one. Therefore, I'm intrigued to find out the distibution of radius_mean as a key feature.
+
+```{r exercise1-mean-radius-histogram, fig.cap="Mean Radius Histogram"}
+
+
+radius_mean_hist <- ggplot(cancer_sample, aes(radius_mean)) +
+  geom_histogram(bins = 50,fill = "blue") +
+  labs(title = "Histogram of mean radius",x = "Mean Radius",y = "Counts") +
+  theme_minimal()+
+  theme(plot.title = element_text(hjust = 0.5)) # center the title #https://stackoverflow.com/questions/40675778/center-plot-title-in-ggplot2
+print(radius_mean_hist)
+```
+
+
+**Exercises 2**: Create a nuclei_size_index to represent the overall size based on perimeter_mean, radius_mean abd area_mean.
+
+**Explanation**: I want to create this new variable to indicate the size of cell nuclei because I feel radius, perimeter and area are all somehow related to the overall size. Creating this new variable may link all those three variables together to be an indicator for malignant or benign cells.
+
+```{r exercise2-new-variable-histogram, fig.cap="Mean Size Index Histogram"}
+
+
+cancer_sample <- cancer_sample %>%
+  mutate(mean_size_index = (radius_mean + perimeter_mean + area_mean) / 3)
+
+mean_size_index_hist <- ggplot(cancer_sample, aes(mean_size_index)) +
+  geom_histogram(bins = 50,fill = "red") +
+  labs(title = "Histogram of newly created variable - mean size index",x = "Mean Radius",y = "Frequency") +
+  theme_minimal()+
+  theme(plot.title = element_text(hjust = 0.5)) # center the title #https://stackoverflow.com/questions/40675778/center-plot-title-in-ggplot2
+print(mean_size_index_hist)
+```
+
+**Exercise 6**: Use a boxplot to look at the frequency of different observations within texture_worst.
+
+**Explanation**: I have speculations that texture may also be an important factor for diagnsis of cancer. However, just looking at mean texture may not be so obvious, therefore, I chose texture_worst to see if this is feature is related to cancer diagnosis.
+
+
+```{r exercise6-texture-worst-boxplot, fig.cap="Texture Worst Boxplot"}
+
+texture_worst_boxplot <- ggplot(cancer_sample, aes(x=diagnosis, y=texture_worst, fill = diagnosis)) +
+  geom_boxplot(alpha = 0.8) +
+  labs(title = "Boxplot of Worst Texture for M and B Diagnosis") +
+  theme_minimal() +
+  scale_fill_manual(values = c("M" = "red", "B" = "blue"))+ #https://r-graph-gallery.com/264-control-ggplot2-boxplot-colors.html
+  theme(plot.title = element_text(hjust = 0.5))
+
+print(texture_worst_boxplot)
+
+```
+
+**Exercise 8**: Use a density plot to explore radius_worst.
+
+**Explanation**: As I have already examined the mean radius, I want to also see the exetreme cases: whether worst radius is related to the diagnosis of cancer. Therefore, I chose exercies 8 to make density plot.
+
+```{r exercise8-radius-worst-density-plot, fig.cap="Radius Worst Density Plot"}
+density_plot <- ggplot(cancer_sample, aes(x = radius_worst, fill = diagnosis)) +
+  geom_density(alpha = 0.8) + 
+  labs( title = "Density Plot of Worst Radius") +
+  theme_minimal() +
+  scale_fill_manual(values = c("M" = "red", "B" = "blue"))+
+  theme(plot.title = element_text(hjust = 0.5))
+print(density_plot)
+```
 
 <!----------------------------------------------------------------------------->
 
@@ -216,7 +288,8 @@ Make sure that you're using dplyr and ggplot2 rather than base R for this task. 
 **(4 points)** So far, you have chosen a dataset and gotten familiar with it through exploring the data. You have also brainstormed one research question that interested you (Task 1.4).  Now it's time to pick 4 research questions that you would like to explore in Milestone 2! Write the 4 questions and any additional comments below. 
 
 <!--- *****START HERE***** --->
-
+**Task 3 Answers**: 
+1. 
 <!----------------------------->
 
 # Overall reproducibility/Cleanliness/Coherence Checklist 
