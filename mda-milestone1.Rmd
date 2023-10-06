@@ -184,7 +184,7 @@ I'm curious to find out how those cell features may correlate and is more determ
  
 <!-------------------------- Start your work below ---------------------------->
 
-**Task 1.4 Answer:** My first research question is whether the radius of the cell nuclei correlate to the diagnosis of the cell healthiness and if so, how do they correlate?
+**Task 1.4 Answer:** My first research question is whether the radius of the cell nuclei correlates to the diagnosis of the cell healthiness and if so, how do they correlate?
 <!----------------------------------------------------------------------------->
 
 # Important note
@@ -249,6 +249,7 @@ mean_size_index_hist <- ggplot(cancer_sample, aes(mean_size_index)) +
 print(mean_size_index_hist)
 ```
 
+
 **Exercise 6**: Use a boxplot to look at the frequency of different observations within texture_worst.
 
 **Explanation**: I have speculations that texture may also be an important factor for diagnsis of cancer. However, just looking at mean texture may not be so obvious, therefore, I chose texture_worst to see if this is feature is related to cancer diagnosis.
@@ -280,6 +281,7 @@ density_plot <- ggplot(cancer_sample, aes(x = radius_worst, fill = diagnosis)) +
   theme(plot.title = element_text(hjust = 0.5))
 print(density_plot)
 ```
+Observation: from the plot, I found that worst radius could be an important factor for predicting cancer as cancer cells have greater worst radius. However, just using this as a prediction feature is not enough and may lead to false prediction.
 
 <!----------------------------------------------------------------------------->
 
@@ -288,8 +290,16 @@ print(density_plot)
 **(4 points)** So far, you have chosen a dataset and gotten familiar with it through exploring the data. You have also brainstormed one research question that interested you (Task 1.4).  Now it's time to pick 4 research questions that you would like to explore in Milestone 2! Write the 4 questions and any additional comments below. 
 
 <!--- *****START HERE***** --->
-**Task 3 Answers**: 
-1. 
+**Task 3 Answers:**
+
+1. Are the size of cell nuclei related to the smoothness or other numerical features? If so, how do they correlate and how will they help predict cancer diagnosis?
+
+2. From the dataset, each feature (such as radius, texture, concavity etc) are provided with mean, worst, and standard error measurements to determine the characteristics of tumors. For each measurement of the features, which is more predictive, (the mean, worst or SE)?
+
+3. Among all the features, which ones are the most dominant features for predicting tumors? How can we find out?
+
+4. Is it possible to use some ML algorithms such as random forest, XGboost to perform cancer diagnosis on this dataset?
+
 <!----------------------------->
 
 # Overall reproducibility/Cleanliness/Coherence Checklist 
