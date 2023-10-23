@@ -1,0 +1,710 @@
+---
+title: "Mini Data Analysis Milestone 2"
+author: Chunyu Wang
+date: October 23, 2023
+output: github_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  fig.path = "figures/",
+  echo = TRUE
+)
+```
+*To complete this milestone, you can either edit [this `.rmd` file](https://raw.githubusercontent.com/UBC-STAT/stat545.stat.ubc.ca/master/content/mini-project/mini-project-2.Rmd) directly. Fill in the sections that are commented out with `<!--- start your work here--->`. When you are done, make sure to knit to an `.md` file by changing the output in the YAML header to `github_document`, before submitting a tagged release on canvas.*
+
+# Welcome to the rest of your mini data analysis project!
+
+In Milestone 1, you explored your data. and came up with research questions. This time, we will finish up our mini data analysis and obtain results for your data by: 
+
+- Making summary tables and graphs 
+- Manipulating special data types in R: factors and/or dates and times.
+-   Fitting a model object to your data, and extract a result.
+-   Reading and writing data as separate files.
+
+We will also explore more in depth the concept of *tidy data.* 
+
+**NOTE**: The main purpose of the mini data analysis is to integrate what you learn in class in an analysis. Although each milestone provides a framework for you to conduct your analysis, it's possible that you might find the instructions too rigid for your data set. If this is the case, you may deviate from the instructions -- just make sure you're demonstrating a wide range of tools and techniques taught in this class.
+
+# Instructions
+
+**To complete this milestone**, edit [this very `.Rmd` file](https://raw.githubusercontent.com/UBC-STAT/stat545.stat.ubc.ca/master/content/mini-project/mini-project-2.Rmd) directly. Fill in the sections that are tagged with `<!--- start your work here--->`.
+
+**To submit this milestone**, make sure to knit this `.Rmd` file to an `.md` file by changing the YAML output settings from `output: html_document` to `output: github_document`. Commit and push all of your work to your mini-analysis GitHub repository, and tag a release on GitHub. Then, submit a link to your tagged release on canvas.
+
+**Points**: This milestone is worth 50 points: 45 for your analysis, and 5 for overall reproducibility, cleanliness, and coherence of the Github submission. 
+
+**Research Questions**: In Milestone 1, you chose two research questions to focus on. Wherever realistic, your work in this milestone should relate to these research questions whenever we ask for justification behind your work. In the case that some tasks in this milestone don't align well with one of your research questions, feel free to discuss your results in the context of a different research question.
+
+# Learning Objectives
+
+By the end of this milestone, you should:
+
+-   Understand what *tidy* data is, and how to create it using `tidyr`.
+-   Generate a reproducible and clear report using R Markdown.
+-   Manipulating special data types in R: factors and/or dates and times.
+-   Fitting a model object to your data, and extract a result.
+-   Reading and writing data as separate files.
+
+# Setup
+
+Begin by loading your data and the tidyverse package below:
+
+```{r, message = FALSE}
+library(datateachr) # <- might contain the data you picked!
+library(tidyverse)
+library(ggplot2)
+library(ggridges)
+library(dplyr)
+library(tidyr)
+library(broom)
+library(tibble)
+
+```
+
+# Task 1: Process and summarize your data 
+
+From milestone 1, you should have an idea of the basic structure of your dataset (e.g. number of rows and columns, class types, etc.). Here, we will start investigating your data more in-depth using various data manipulation functions. 
+
+### 1.1 (1 point) 
+
+First, write out the 4 research questions you defined in milestone 1 were. This will guide your work through milestone 2:
+
+<!-------------------------- Start your work below ---------------------------->
+### Task 1.1 Answer:
+
+1.  Are the size of cell nuclei related to the smoothness or other
+    numerical features? If so, how do they correlate and how will they
+    help predict cancer diagnosis?
+
+2.  From the dataset, each feature (such as radius, texture, concavity
+    etc) are provided with mean, worst, and standard error measurements
+    to determine the characteristics of tumors. For each measurement of
+    the features, which is more predictive, (the mean, worst or SE)?
+
+3.  Among all the features, which ones are the most dominant features
+    for predicting tumors? How can we find out?
+
+4.  Is it possible to use some ML algorithms such as random forest,
+    XGboost to perform cancer diagnosis on this dataset?
+<!----------------------------------------------------------------------------->
+
+Here, we will investigate your data using various data manipulation and graphing functions.
+
+### 1.2 (8 points)
+
+Now, for each of your four research questions, choose one task from options 1-4 (summarizing), and one other task from 4-8 (graphing). You should have 2 tasks done for each research question (8 total). Make sure it makes sense to do them! (e.g. don't use a numerical variables for a task that needs a categorical variable.). Comment on why each task helps (or doesn't!) answer the corresponding research question.
+
+Ensure that the output of each operation is printed!
+
+Also make sure that you're using dplyr and ggplot2 rather than base R. Outside of this project, you may find that you prefer using base R functions for certain tasks, and that's just fine! But part of this project is for you to practice the tools we learned in class, which is dplyr and ggplot2.
+
+**Summarizing:**
+
+1.  Compute the *range*, *mean*, and *two other summary statistics* of **one numerical variable** across the groups of **one categorical variable** from your data.
+2.  Compute the number of observations for at least one of your categorical variables. Do not use the function `table()`!
+3.  Create a categorical variable with 3 or more groups from an existing numerical variable. You can use this new variable in the other tasks! *An example: age in years into "child, teen, adult, senior".*
+4. Compute the proportion and counts in each category of one categorical variable across the groups of another categorical variable from your data. Do not use the function `table()`!
+
+**Graphing:**
+
+6. Create a graph of your choosing, make one of the axes logarithmic, and format the axes labels so that they are "pretty" or easier to read.
+7. Make a graph where it makes sense to customize the alpha transparency.
+
+Using variables and/or tables you made in one of the "Summarizing" tasks: 
+
+8. Create a graph that has at least two geom layers. 
+9. Create 3 histograms, with each histogram having different sized bins. Pick the "best" one and explain why it is the best.
+
+Make sure it's clear what research question you are doing each operation for!
+
+<!------------------------- Start your work below ----------------------------->
+### Task 1.2 Answer:
+
+#### Research Question 1:
+
+**Summarizing:** I chose ***Option 1***: Compute the *range*, *mean*, and *two other summary statistics* of **one numerical variable** across the groups of **one categorical variable** from your data.
+
+Here is the summary for radius_mean: 
+
+```{r}
+radius_mean_summary <- cancer_sample %>%
+  group_by(diagnosis) %>%
+  summarise(
+    mean = mean(radius_mean),
+    range = max(radius_mean) - min(radius_mean),
+    median = median(radius_mean),
+    standard_deviation = sd(radius_mean),
+  )
+
+print(radius_mean_summary)
+```
+**Comment:**
+
+This will illustrate how the (mean) radius of cell nuclei varies between different benign/malignant categories. Apparently, malignant cells have greater size than benign cells in most of cases. Radius_mean helps predict diagnosis.
+
+**Graphing:** I chose ***Option 8***: Create a graph that has at least two geom layers. 
+
+
+```{r task1.2-q1-graphing, fig.cap="radius_mean Versus smoothness_mean"}
+ggplot(cancer_sample, aes(x = radius_mean, y = smoothness_mean)) +
+  geom_point(aes(color = diagnosis)) +  # first geom layer
+  geom_smooth(method = "lm", se = FALSE) +  # second geom: trend line
+  labs(title = "radius_mean Versus smoothness_mean", x = "Radius Mean", y = "Smoothness Mean") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+**Comment:**
+
+The combination of these two geom layers shows that radius_mean does not necessarly correlate with smoothness_mean. However, Radius_mean appears to have wider spread for classifying Malignant/Benign diagnosis. Similar plots could be done for other features such as radius vs texture, smoothness vs texture.
+
+#### Research Question 2:
+
+**Summarizing:** I chose ***Option 3***: Create a categorical variable with 3 or more groups from an existing numerical variable. You can use this new variable in the other tasks! *An example: age in years into "child, teen, adult, senior".*
+
+
+```{r}
+
+
+# Categorize 'radius_mean' using quantiles directly within mutate
+cancer_sample <- cancer_sample %>%
+  mutate(radius_mean_category = case_when(
+    radius_mean <= quantile(radius_mean, 0.25) ~ "Small",
+    radius_mean <= quantile(radius_mean, 0.75) ~ "Medium",
+    TRUE ~ "Large"
+  ))
+#
+counts_mean_summary <- cancer_sample %>%
+  group_by(diagnosis, radius_mean_category) %>%
+  summarise(count = n(), .groups = 'drop')
+
+print(counts_mean_summary)
+
+
+```
+
+```{r}
+
+cancer_sample <- cancer_sample %>%
+  mutate(radius_se_category = case_when(
+    radius_se <= quantile(radius_se, 0.25) ~ "Low",
+    radius_se <= quantile(radius_se, 0.75) ~ "Medium",
+    TRUE ~ "High"
+  ))
+
+counts_se <- cancer_sample %>%
+  group_by(diagnosis, radius_se_category) %>%
+  summarise(count = n(), .groups = 'drop')
+
+print(counts_se)
+
+```
+
+```{r}
+
+cancer_sample <- cancer_sample %>%
+  mutate(radius_worst_category = case_when(
+    radius_worst <= quantile(radius_worst, 0.25) ~ "Small",
+    radius_worst <= quantile(radius_worst, 0.75) ~ "Medium",
+    TRUE ~ "Large"
+  ))
+
+counts_worst <- cancer_sample %>%
+  group_by(diagnosis, radius_worst_category) %>%
+  summarise(count = n(), .groups = 'drop')
+
+print(counts_worst)
+#cancer_sample
+```
+
+**Comment:**
+
+By categorizing radius size into 3 category based on se, mean and worst values respectively, we can get a better sense of the distribution of B and M diagnosis across those three categories. It appears radius_worst value demonstrated a better spread then radius_mean and radius_se, which makes it more preditive for diagnosis.
+
+
+
+**Graphing:** I chose ***Option 7***: Make a graph where it makes sense to customize the alpha transparency.
+
+
+```{r task1.2-q2-graphing, fig.cap="Distribution of different Radius Measurements"}
+
+custom_alpha <- 0.4
+cancer_sample %>%
+  select(diagnosis, radius_mean, radius_se, radius_worst) %>%
+  gather(key = "measurement", value = "value", -diagnosis) %>%
+  mutate(measurement = factor(measurement, levels = c("radius_se", "radius_worst", "radius_mean"))) %>%
+  ggplot(aes(x = value, y = measurement, fill = diagnosis)) +
+  geom_density_ridges(alpha = custom_alpha) +
+  labs(title = "Distribution of different Radius Measurements", x = "Value", y = "Measurement Type") +
+  theme_minimal()
+```
+
+
+**Comment:**
+
+I chose option 7 for graphing is because it is necessary to set transparency here becasue we do not want the graph to cover others and we wish to know the "spread" of our data.
+Now it looks for radius, radius_worst is more predictive for diagnosis.
+
+
+
+#### Research Question 3: 
+Compute the proportion and counts in each category of one categorical variable across the groups of another categorical variable from your data. Do not use the function `table()`!
+
+**Summarizing:** I chose ***Option 4***: Compute the proportion and counts in each category of one categorical variable across the groups of another categorical variable from your data. Do not use the function `table()`!
+
+
+```{r}
+radius_worst_category_counts_proportion_summary <- cancer_sample %>%
+  group_by(diagnosis, radius_worst_category) %>%
+  summarise(
+    count = n(),
+    proportion = count / nrow(cancer_sample), ## calculate proportion
+    .groups = 'drop'
+  )
+print(radius_worst_category_counts_proportion_summary)
+
+```
+**Comment:** 
+ 
+By doing this, we can see the spread of benign and malignant diagnoses within different (worst) radius categories (Small, Medium, Large). 
+We could do the same for other attributes such as texture, smoothness. Such distributions can be helpful in determining which factor are more likely associated with malignant tumors. 
+
+**Graphing:** I chose ***Option 6***: Create a graph of your choosing, make one of the axes logarithmic, and format the axes labels so that they are "pretty" or easier to read.
+
+
+```{r task1.2-q3-graphing, fig.cap="log-scale box-plot (mean)"}
+
+log_plot <- cancer_sample %>%
+  select(diagnosis, texture_mean, perimeter_mean, area_mean, smoothness_mean, compactness_mean, concavity_mean, concave_points_mean, symmetry_mean, fractal_dimension_mean) %>%
+  mutate(across(-diagnosis, ~log(.))) %>%   # apply log. except for diagnosis
+  gather(key = "means", value = "log_value", -diagnosis) %>%   # convert to long format  
+  ggplot(aes(x = means, y = log_value, fill = diagnosis)) +
+  geom_boxplot() +
+  labs(title = "log-scale box-plot (mean)", x = "Measurement Type", y = "log-scale value") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), plot.title = element_text(hjust = 0.5))
+
+print(log_plot)
+```
+
+**Comment:** 
+ 
+By plotting the box plot for measurement of each feature, I could see which feature is more preditive or condusive to diagnosis.
+Becasue different features have values in different scale, converting them to log-scale for plotting allows us to observe the spreads in one graph.
+From observation, area, concavity, concave_points present better spread compared to other features across B/M diagnosis.
+
+
+#### Research Question 4: 
+
+
+**Summarizing:** I chose ***Option 2***: Compute the number of observations for at least one of your categorical variables. Do not use the function `table()`!
+
+
+```{r}
+
+data_balance_summary <- cancer_sample %>%
+  group_by(diagnosis) %>%
+  tally(name = "number of observations")
+
+print(data_balance_summary)
+
+
+```
+
+
+**Comment:** 
+ 
+I wish to see if this is a balanced dataset, which is important for ML. Apparently, this dataset is slightly imbalanced with Benign data more than Malignant data. However, it appears that it is still good enough for XGBoost and Random Forest Algorithm on a basic level.
+
+**Graphing:** I chose ***Option 8***: Create a graph that has at least two geom layers. 
+
+```{r task1.2-q4-graphing, fig.cap="log-scale box-plot (mean)"}
+data_balance_summary %>%
+  ggplot(aes(x = diagnosis, y = `number of observations`, fill = diagnosis)) +
+  geom_bar(stat = "identity") +   ## first geom
+  geom_text(aes(label = `number of observations`), vjust = -0.5) + ## second geom layer
+  labs(title = "Number of Malignant and Benign Diagnoses") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+<!----------------------------------------------------------------------------->
+
+
+**Comment:** 
+ 
+This graphing option helps to visualize the data category size using two geom layers.
+
+### 1.3 (2 points)
+
+Based on the operations that you've completed, how much closer are you to answering your research questions? Think about what aspects of your research questions remain unclear. Can your research questions be refined, now that you've investigated your data a bit more? Which research questions are yielding interesting results?
+
+<!------------------------- Write your answer here ---------------------------->
+
+### Task 1.3 Answer:
+
+
+1.  ***Research Question 1:***
+
+I have provided a summary of radius_mean and its spread acrosss benign/malignant diagnosis.
+Additiohnally, I also investigated the correlation between radius_mean and smoothness_mean and found out that they do not really correlate. 
+
+It may be beneficial to explore the relatipnship between other numerical features and and see how they correlate with size. For example, by common sense perimeters and radius, areas and radius are more likely to correlate.
+
+To refine this research question:  Do perimeters and areas correlate with radius? They appear to all reflect the "size" of the cell nuclei to some extent.
+
+2.  ***Research Question 2:***
+
+I have categorized the radius size based on mean, SE, worst values to 3 categories which helps to determine the distribution of radius through Mean, SE, worst.
+However, it seems that even though radius_worst present a better spread, SE and Mean also have visiable distribution across B/M diagnosis. So would it be beneficial to average mean, SE, worst values for each feature and create a new variable called index to determine their spread.
+
+To refine this research question: Create a new variable based on SE, mean, worst measurements and investigate their distribution by diagnosis and understand which feature index helps prediction.
+
+
+2.  ***Research Question 3:***
+
+As I have divided the radius_worst into 3 categories, and gained insights into the spread of benign and malignant diagnoses within different radius categories. The log-scaled boxplot further helped in identifying which (mean) features area, concavity, concave_points have better predictive power.
+
+To refine this research quetsion: investigate the relationship between area, concavity and concave_points across diagnosis to see whether they are related and contribute to the prediction of diagnosis.
+
+
+2.  ***Research Question 4:***
+
+I have investigated the balance of the dataset. Looks like it is suitable for ML. However, using XGBoost, Randon Forrest may be an overkill. Would a simple linearor logistic  model suffice to predict diagnosis based on features?
+
+
+To refine this research quetsion: Before applying complex machine learning models, perhaps I should try simpler regression models on this dataset to see how well they perform. If they don't perform as expected, then we can proceed with more complex models like XGBoost or Random Forests.
+
+<!----------------------------------------------------------------------------->
+
+# Task 2: Tidy your data 
+
+In this task, we will do several exercises to reshape our data. The goal here is to understand how to do this reshaping with the `tidyr` package.
+
+A reminder of the definition of *tidy* data:
+
+-   Each row is an **observation**
+-   Each column is a **variable**
+-   Each cell is a **value**
+
+### 2.1 (2 points)
+
+Based on the definition above, can you identify if your data is tidy or untidy? Go through all your columns, or if you have \>8 variables, just pick 8, and explain whether the data is untidy or tidy.
+
+<!--------------------------- Start your work below --------------------------->
+
+### Task 2.1 Answer:
+
+My dataset has more than 8 variables. So I create a subset of my dataset with first 8 variables. 
+
+
+1. check for duplicated rows and count them
+
+```{r}
+cancer_subset <- cancer_sample %>% select(1:8)
+
+
+num_duplicated_rows <- cancer_subset %>%
+  filter(duplicated(.)) %>%
+  nrow()
+print(num_duplicated_rows)
+```
+
+2.  Check for inconsistencies in the first 8 columns
+
+```{r}
+data_types <- cancer_subset%>%
+  sapply(class)
+
+data_types
+```
+3.  Check for missing values
+
+```{r}
+
+na_values <- sapply(cancer_subset, function(x) sum(is.na(x)))
+na_values
+
+```
+By definition, this dataset is tidy.
+
+
+<!----------------------------------------------------------------------------->
+
+### 2.2 (4 points)
+
+Now, if your data is tidy, untidy it! Then, tidy it back to it's original state.
+
+If your data is untidy, then tidy it! Then, untidy it back to it's original state.
+
+Be sure to explain your reasoning for this task. Show us the "before" and "after".
+
+<!--------------------------- Start your work below --------------------------->
+
+### Task 2.2 Answer:
+
+Untidy the data using pivot_longer to increase the numebr of rows. 
+
+```{r}
+
+
+
+untidy_data <- cancer_sample %>%
+  pivot_longer(
+    cols = ends_with("_mean"), 
+    names_to = "mean_measurement", 
+    values_to = "mean_value"
+  )
+
+untidy_data
+```
+Tidy it back using pivot_wider: 
+
+```{r}
+
+tidy_data <- untidy_data %>%
+  pivot_wider(
+    names_from = mean_measurement, 
+    values_from = mean_value
+  )
+
+tidy_data
+```
+
+<!----------------------------------------------------------------------------->
+
+### 2.3 (4 points)
+
+Now, you should be more familiar with your data, and also have made progress in answering your research questions. Based on your interest, and your analyses, pick 2 of the 4 research questions to continue your analysis in the remaining tasks:
+
+
+### Task 2.3 Answer: 
+
+<!-------------------------- Start your work below ---------------------------->
+
+1.  Do perimeters, areas correlate with radius? They appear to all reflect the "size" of the cell nuclei to some extent.
+2.  Create a new variable based on SE, mean, worst measurements and investigate their distribution by diagnosis and understand which feature index helps prediction.
+
+<!----------------------------------------------------------------------------->
+
+Explain your decision for choosing the above two research questions.
+
+<!--------------------------- Start your work below --------------------------->
+Question 1 justification: Understanding the physical dimensions of cells can be critical in distinguishing between benign and malignant tumors. If there is a strong correlation between these metrics, they could become essential features in models aiming to identify cancer cells.
+
+
+Question 2 justification:  If the newly created feature has predictive power, it could be used directly to help with diagnoses and reduce the dimension of our model size by effectively reducing the number of features.
+<!----------------------------------------------------------------------------->
+
+Now, try to choose a version of your data that you think will be appropriate to answer these 2 questions. Use between 4 and 8 functions that we've covered so far (i.e. by filtering, cleaning, tidy'ing, dropping irrelevant columns, etc.).
+
+(If it makes more sense, then you can make/pick two versions of your data, one for each research question.) 
+
+<!--------------------------- Start your work below --------------------------->
+
+The new version of data is as following to help address research question 1 and 2.
+
+```{r}
+rq_data <- cancer_sample %>%
+  select(diagnosis, ends_with("_mean"), ends_with("_se"), ends_with("_worst"), contains("diagnosis")) %>%  ## select only ending with mean, se, worst measurement types
+  select(diagnosis, contains("radius"), contains("perimeter"), contains("area"), contains("diagnosis")) %>%  # for rq 1 and 2, only care about radius, peri, area
+  mutate(radius_index = (radius_mean + radius_se + radius_worst) / 3,   #create size index variables based on se, mean, worst
+         perimeter_index = (perimeter_mean + perimeter_se + perimeter_worst) / 3,
+         area_index = (area_mean + area_se + area_worst) / 3) %>%
+  drop_na()
+
+head(rq_data)
+```
+
+<!----------------------------------------------------------------------------->
+
+# Task 3: Modelling
+
+## 3.0 (no points)
+
+Pick a research question from 1.2, and pick a variable of interest (we'll call it "Y") that's relevant to the research question. Indicate these.
+
+<!-------------------------- Start your work below ---------------------------->
+
+**Research Question**: Do perimeters, areas correlate with radius? They appear to all reflect the "size" of the cell nuclei to some extent. (for the purpose of addressing this question, we only chose perimeters as "Y")
+
+**Variable of interest**: perimeter_index
+
+
+<!----------------------------------------------------------------------------->
+
+## 3.1 (3 points)
+
+Fit a model or run a hypothesis test that provides insight on this variable with respect to the research question. Store the model object as a variable, and print its output to screen. We'll omit having to justify your choice, because we don't expect you to know about model specifics in STAT 545.
+
+-   **Note**: It's OK if you don't know how these models/tests work. Here are some examples of things you can do here, but the sky's the limit.
+
+    -   You could fit a model that makes predictions on Y using another variable, by using the `lm()` function.
+    -   You could test whether the mean of Y equals 0 using `t.test()`, or maybe the mean across two groups are different using `t.test()`, or maybe the mean across multiple groups are different using `anova()` (you may have to pivot your data for the latter two).
+    -   You could use `lm()` to test for significance of regression coefficients.
+
+<!-------------------------- Start your work below ---------------------------->
+
+### Task 3.1 Answer: 
+
+```{r}
+perimeter_radius_lm <- lm(perimeter_index ~ radius_index, data = rq_data)
+summary(perimeter_radius_lm)
+
+```
+
+
+
+<!----------------------------------------------------------------------------->
+
+## 3.2 (3 points)
+
+Produce something relevant from your fitted model: either predictions on Y, or a single value like a regression coefficient or a p-value.
+
+-   Be sure to indicate in writing what you chose to produce.
+-   Your code should either output a tibble (in which case you should indicate the column that contains the thing you're looking for), or the thing you're looking for itself.
+-   Obtain your results using the `broom` package if possible. If your model is not compatible with the broom function you're needing, then you can obtain your results by some other means, but first indicate which broom function is not compatible.
+
+<!-------------------------- Start your work below ---------------------------->
+
+### Task 3.2 Answer: 
+
+I'm choosing the slope, intercept, R_squared and p_value from my fitted model.
+
+```{r}
+model_summary <- tidy(perimeter_radius_lm) #model summary as a tibble
+model_summary
+```
+
+
+
+```{r}
+
+slope <- model_summary$estimate[model_summary$term == "radius_index"]
+intercept <- model_summary$estimate[model_summary$term == "(Intercept)"]
+p_value <- model_summary$p.value[model_summary$term == "radius_index"]
+r_squared <- perimeter_radius_lm %>%
+  glance() %>%
+  pull(r.squared)
+
+
+summary_tibble <- tibble( # combine into tibble
+  Slope = slope,
+  Intercept = intercept,
+  R_squared = r_squared,
+  P_value = p_value
+)
+
+print(summary_tibble)
+
+```
+I have also plotted the scatter plot for radius_index and perimter_index with a fitted model). They demonstrated strong correlation which verifies the hypothesis.
+
+
+```{r task3.2-figure, fig.cap="radius_index vs perimeter_index with fitted model"}
+library(ggplot2)
+
+ggplot(data = rq_data, aes(x = radius_index, y = perimeter_index)) + 
+  geom_point(aes(color = diagnosis), alpha = 0.6) +
+  geom_abline(intercept = unlist(intercept), slope = unlist(slope), color = "black") +  # Manual regression line
+  labs(title = "radius_index vs perimeter_index with fitted model",
+       x = "radius_index", y = "perimeter_index", color = "Diagnosis") +
+  theme_minimal()
+
+```
+
+
+
+<!----------------------------------------------------------------------------->
+
+# Task 4: Reading and writing data
+
+Get set up for this exercise by making a folder called `output` in the top level of your project folder / repository. You'll be saving things there.
+
+## 4.1 (3 points)
+
+Take a summary table that you made from Task 1, and write it as a csv file in your `output` folder. Use the `here::here()` function.
+
+-   **Robustness criteria**: You should be able to move your Mini Project repository / project folder to some other location on your computer, or move this very Rmd file to another location within your project repository / folder, and your code should still work.
+-   **Reproducibility criteria**: You should be able to delete the csv file, and remake it simply by knitting this Rmd file.
+
+<!-------------------------- Start your work below ---------------------------->
+
+
+```{r}
+if (!dir.exists("output")) { # create output folder
+  dir.create("output")    ## delete if already exists.
+}
+
+output <- "output/radius_worst_summary.csv" # this is a relative path,
+# should work under the project directory
+write.csv(radius_worst_category_counts_proportion_summary, output, row.names = FALSE)
+
+
+```
+<!----------------------------------------------------------------------------->
+
+## 4.2 (3 points)
+
+Write your model object from Task 3 to an R binary file (an RDS), and load it again. Be sure to save the binary file in your `output` folder. Use the functions `saveRDS()` and `readRDS()`.
+
+-   The same robustness and reproducibility criteria as in 4.1 apply here.
+
+<!-------------------------- Start your work below ---------------------------->
+
+
+```{r}
+if (!dir.exists("output")) { # create output folder
+  dir.create("output")    ## delete if already exists.
+}
+
+
+model_path <- "output/model.rds" # this is a relative path,
+
+saveRDS(perimeter_radius_lm, file = model_path)
+
+```
+
+
+```{r}
+
+# load the model again
+loaded_model <- readRDS(model_path)
+print(loaded_model)
+```
+<!----------------------------------------------------------------------------->
+
+# Overall Reproducibility/Cleanliness/Coherence Checklist 
+
+Here are the criteria we're looking for.
+
+## Coherence (0.5 points)
+
+The document should read sensibly from top to bottom, with no major continuity errors. 
+
+The README file should still satisfy the criteria from the last milestone, i.e. it has been updated to match the changes to the repository made in this milestone. 
+
+## File and folder structure (1 points)
+
+You should have at least three folders in the top level of your repository: one for each milestone, and one output folder. If there are any other folders, these are explained in the main README.
+
+Each milestone document is contained in its respective folder, and nowhere else.
+
+Every level-1 folder (that is, the ones stored in the top level, like "Milestone1" and "output") has a `README` file, explaining in a sentence or two what is in the folder, in plain language (it's enough to say something like "This folder contains the source for Milestone 1").
+
+## Output (1 point)
+
+All output is recent and relevant:
+
+-   All Rmd files have been `knit`ted to their output md files. 
+-   All knitted md files are viewable without errors on Github. Examples of errors: Missing plots, "Sorry about that, but we can't show files that are this big right now" messages, error messages from broken R code
+-   All of these output files are up-to-date -- that is, they haven't fallen behind after the source (Rmd) files have been updated.
+-   There should be no relic output files. For example, if you were knitting an Rmd to html, but then changed the output to be only a markdown file, then the html file is a relic and should be deleted.
+
+Our recommendation: delete all output files, and re-knit each milestone's Rmd file, so that everything is up to date and relevant.
+
+## Tagged release (0.5 point)
+
+You've tagged a release for Milestone 2. 
+
+### Attribution
+
+Thanks to Victor Yuan for mostly putting this together.
